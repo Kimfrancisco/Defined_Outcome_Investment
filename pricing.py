@@ -63,8 +63,6 @@ class option_pricing:
         return self.opt_price
 
     def plain_payoff(self):
-
-        # payoff_space = self.payoff_space
         payoff_space = np.zeros(int(200 / self.unit))
         if self.option_type == 'call':
             i = 0
@@ -72,19 +70,18 @@ class option_pricing:
                 payoff_space[i] = 0
                 i = i + 1
             while (i * self.unit) > (self.strike_price_norm):
-                if int(i) < 200 / self.unit:
+                if i * self.unit < 200:
                     payoff_space[i] = (i*self.unit) - self.strike_price_norm
                     i = i + 1
                 else:
                     break
-
         elif self.option_type == 'put':
             i = 0
             while (i * self.unit) < (self.strike_price_norm):
-                payoff_space[i] = self.strike_price_norm -  (i*self.unit)
+                payoff_space[i] = self.strike_price_norm - (i*self.unit)
                 i = i + 1
             while (i * self.unit) > (self.strike_price_norm):
-                if int(i) < 200 / self.unit:
+                if i * self.unit < 200:
                     payoff_space[i] = 0
                     i = i + 1
                 else:
@@ -93,19 +90,16 @@ class option_pricing:
             print("option type should be 'call' or 'put', please check option type input")
 
         self.payoff_space = payoff_space
-
         return self.payoff_space
 
     def option_payoff(self):
         if self.position == 'long':
-            self.opt_payoff = self.payoff_space - (self.opt_price/self.spot_price)
+            return self.plain_payoff() - (self.bsm() / self.spot_price)
         elif self.position == 'short':
-            self.opt_payoff = self.payoff_space + (self.opt_price/self.spot_price)
+            return - self.plain_payoff() + (self.bsm() /self.spot_price)
         else:
             print("option position is not valid")
-
-        print("option price is :" , self.opt_price)
-        return self.opt_payoff
+        return 0
 
 class calc_implied_volatility:
     def __init__(self , ):
@@ -122,13 +116,12 @@ class calc_implied_volatility:
 
         self.unit = 0.01
 
-
-
 # main function
 if __name__ == "__main__":
 
-    aa = option_pricing(option_type='call', position = 'long' , time_to_maturity=1, spot_price=421, strike_price=400,
-                                risk_free=0.0165, dividend_yield=0.02, implied_vol=0.10)
+    aa = pricing.option_pricing(option_type='call', position='long', time_to_maturity=1, spot_price=421,
+                                strike_price=400, risk_free=0.0165, dividend_yield=0.02, implied_vol=0.10)
+
     print(aa.plain_payoff())
     line = (aa.plain_payoff())
 
